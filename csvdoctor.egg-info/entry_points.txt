@@ -1,0 +1,2 @@
+[console_scripts]
+csvdoctor = csvdoctor.cli:main

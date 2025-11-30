@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+  <head>
+    <meta charset="utf-8" />
+    <title>CSV Doctor v5 – Relatório</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  </head>
+  <body class="bg-slate-950 text-slate-100">
+    <div id="root" class="min-h-screen"></div>
+
+    <script type="application/json" id="csvdoctor-data">
+$json_data
+    </script>
+
+    <script>
+      (function() {
+        const e = React.createElement;
+
+        function useData() {
+          const el = document.getElementById("csvdoctor-data");
+          if (!el) return null;
+          try {
+            return JSON.parse(el.textContent);
+          } catch (err) {
+            console.error("Erro ao parsear JSON:", err);
+            return null;
+          }
+        }
+
+        function Badge(props) {
+          return e(
+            "span",
+            {
+              className:
+                "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-slate-800 text-slate-100 mr-1"
+            },
+            props.children
+          );
+        }
+
+        function Card(props) {
+          return e(
+            "div",
+            {
+              className:
+                "bg-slate-900/80 border border-slate-800 rounded-2xl p-4 shadow-lg shadow-slate-900/40 mb-4"
+            },
+            props.children
+          );
+        }
+
+        function ScorePill(props) {
+          const score = props.score || 0;
+          let color = "bg-emerald-500/10 text-emerald-300 border-emerald-500/40";
+          if (score < 50) {
+            color = "bg-red-500/10 text-red-300 border-red-500/40";
+          } else if (score < 80) {
+            color = "bg-amber-500/10 text-amber-300 border-amber-500/40";
+          }
+          return e(
+            "div",
+            {
+              className:
+                "inline-flex items-baseline px-4 py-2 rounded-full border " +
+                color +
+                " text-sm font-semibold"
+            },
+            [
+              e("span", { key: "label", className: "mr-2 text-xs uppercase tracking-wide" }, "Score"),
+              e("span", { key: "value", className: "text-xl font-bold" }, String(score))
+            ]
+          );
+        }
+
+        function App() {
+          const data = useData();
+          if (!data) {
+            return e(
+              "div",
+              { className: "flex items-center justify-center min-h-screen" },
+              "Erro ao carregar dados do relatório."
+            );
+          }
+
+          const repair = data.repair_info || null;
+
+          return e(
+            "div",
+            { className: "max-w-6xl mx-auto px-4 py-8 space-y-6" },
+            [
+              e(
+                "header",
+                { key: "header", className: "flex flex-col gap-3 md:flex-row md:items-center md:justify-between" },
+                [
+                  e(
+                    "div",
+                    { key: "left" },
+                    [
+                      e(
+                        "h1",
+                        { className: "text-2xl md:text-3xl font-bold tracking-tight" },
+                        "🩺 CSV Doctor v5 – Relatório de Diagnóstico"
+                      ),
+                      e(
+                        "p",
+                        { className: "text-slate-400 text-sm mt-1" },
+                        data.file_path || "Caminho do arquivo não informado"
+                      )
+                    ]
+                  ),
+                  e(
+                    "div",
+                    { key: "right", className: "flex flex-col items-start md:items-end gap-2" },
+                    [
+                      e(ScorePill, { key: "score", score: data.quality_score }),
+                      e(
+                        "div",
+                        { key: "meta", className: "flex flex-wrap gap-2 text-xs text-slate-400" },
+                        [
+                          e(Badge, { key: "enc" }, "Encoding: " + (data.encoding || "?")),
+                          e(Badge, { key: "delim" }, "Delimitador: " + JSON.stringify(data.delimiter || "?"))
+                        ]
+                      )
+                    ]
+                  )
+                ]
+              ),
+              repair && e(
+                Card,
+                { key: "repair" },
+                [
+                  e("h2", { className: "text-lg font-semibold mb-1" }, "Resumo do reparo automático"),
+                  e(
+                    "p",
+                    { className: "text-xs text-slate-400 mb-2" },
+                    repair.repaired_file ?
+                      "Arquivo reparado: " + repair.repaired_file :
+                      "Informações de reparo indisponíveis."
+                  ),
+                  e(
+                    "div",
+                    { className: "grid grid-cols-2 md:grid-cols-4 gap-2 text-xs" },
+                    [
+                      e("div", { key: "rows" }, [
+                        e("div", { className: "text-slate-400" }, "Linhas totais"),
+                        e("div", { className: "font-semibold" }, String(repair.rows_total || "-"))
+                      ]),
+                      e("div", { key: "ok" }, [
+                        e("div", { className: "text-slate-400" }, "Linhas OK"),
+                        e("div", { className: "font-semibold" }, String(repair.rows_ok || "-"))
+                      ]),
+                      e("div", { key: "pad" }, [
+                        e("div", { className: "text-slate-400" }, "Linhas preenchidas"),
+                        e("div", { className: "font-semibold" }, String(repair.rows_padded || "-"))
+                      ]),
+                      e("div", { key: "shrunk" }, [
+                        e("div", { className: "text-slate-400" }, "Linhas condensadas"),
+                        e("div", { className: "font-semibold" }, String(repair.rows_shrunk || "-"))
+                      ])
+                    ]
+                  )
+                ]
+              ),
+              e(
+                "main",
+                { key: "main", className: "grid grid-cols-1 lg:grid-cols-3 gap-4" },
+                [
+                  e(
+                    "section",
+                    { key: "col1", className: "lg:col-span-2 space-y-4" },
+                    [
+                      e(
+                        Card,
+                        { key: "errors" },
+                        [
+                          e("h2", { className: "text-lg font-semibold mb-2" }, "Erros detectados"),
+                          (data.errors_detected && data.errors_detected.length) ?
+                            e(
+                              "ul",
+                              { className: "list-disc ml-5 space-y-1 text-sm text-slate-200" },
+                              data.errors_detected.map(function(err, idx) {
+                                return e("li", { key: idx }, err);
+                              })
+                            ) :
+                            e("p", { className: "text-sm text-slate-400" }, "Nenhum erro crítico detectado.")
+                        ]
+                      ),
+                      e(
+                        Card,
+                        { key: "columns" },
+                        [
+                          e("h2", { className: "text-lg font-semibold mb-2" }, "Resumo de colunas"),
+                          (data.column_summary && data.column_summary.length) ?
+                            e(
+                              "div",
+                              { className: "overflow-x-auto" },
+                              e(
+                                "table",
+                                { className: "min-w-full text-sm" },
+                                [
+                                  e(
+                                    "thead",
+                                    { key: "thead", className: "text-slate-400 border-b border-slate-800" },
+                                    e(
+                                      "tr",
+                                      null,
+                                      [
+                                        e("th", { key: "c1", className: "text-left py-1 pr-4" }, "Coluna"),
+                                        e("th", { key: "c2", className: "text-left py-1 pr-4" }, "Tipo"),
+                                        e("th", { key: "c3", className: "text-left py-1 pr-4" }, "Null %"),
+                                        e("th", { key: "c4", className: "text-left py-1 pr-4" }, "Únicos"),
+                                        e("th", { key: "c5", className: "text-left py-1 pr-4" }, "Flags")
+                                      ]
+                                    )
+                                  ),
+                                  e(
+                                    "tbody",
+                                    { key: "tbody" },
+                                    data.column_summary.map(function(col, idx) {
+                                      var flags = [];
+                                      if (col.suspicious) {
+                                        flags.push("suspicious");
+                                      }
+                                      return e(
+                                        "tr",
+                                        { key: idx, className: "border-b border-slate-900/60" },
+                                        [
+                                          e("td", { className: "py-1 pr-4 font-medium" }, col.name),
+                                          e("td", { className: "py-1 pr-4 text-slate-300" }, col.dtype),
+                                          e("td", { className: "py-1 pr-4" }, (col.null_fraction * 100).toFixed(1) + "%"),
+                                          e("td", { className: "py-1 pr-4" }, String(col.n_unique)),
+                                          e(
+                                            "td",
+                                            { className: "py-1 pr-4 text-xs" },
+                                            flags.length ? flags.join(", ") : "-"
+                                          )
+                                        ]
+                                      );
+                                    })
+                                  )
+                                ]
+                              )
+                            ) :
+                            e("p", { className: "text-sm text-slate-400" }, "Sem informações de colunas disponíveis.")
+                        ]
+                      )
+                    ]
+                  ),
+                  e(
+                    "section",
+                    { key: "col2", className: "space-y-4" },
+                    [
+                      e(
+                        Card,
+                        { key: "suggestions" },
+                        [
+                          e("h2", { className: "text-lg font-semibold mb-2" }, "Sugestões"),
+                          (data.suggestions && data.suggestions.length) ?
+                            e(
+                              "ul",
+                              { className: "list-disc ml-5 space-y-1 text-sm text-slate-200" },
+                              data.suggestions.map(function(s, idx) {
+                                return e("li", { key: idx }, s);
+                              })
+                            ) :
+                            e("p", { className: "text-sm text-slate-400" }, "Nenhuma sugestão adicional.")
+                        ]
+                      ),
+                      e(
+                        Card,
+                        { key: "preview" },
+                        [
+                          e("h2", { className: "text-lg font-semibold mb-2" }, "Preview bruto (até 50 linhas)"),
+                          data.preview_raw && data.preview_raw.length ?
+                            e(
+                              "pre",
+                              { className: "text-xs bg-slate-950/60 p-2 rounded-lg overflow-x-auto whitespace-pre-wrap" },
+                              data.preview_raw.join("\n")
+                            ) :
+                            e("p", { className: "text-sm text-slate-400" }, "Sem preview disponível.")
+                        ]
+                      ),
+                      e(
+                        Card,
+                        { key: "badrows" },
+                        [
+                          e("h2", { className: "text-lg font-semibold mb-2" }, "Linhas problemáticas (amostra)"),
+                          data.bad_rows && Object.keys(data.bad_rows).length ?
+                            e(
+                              "ul",
+                              { className: "list-disc ml-5 space-y-1 text-xs text-slate-200" },
+                              Object.keys(data.bad_rows).slice(0, 20).map(function(k) {
+                                return e(
+                                  "li",
+                                  { key: k },
+                                  "Linha " + k + ": " + String(data.bad_rows[k])
+                                );
+                              })
+                            ) :
+                            e("p", { className: "text-sm text-slate-400" }, "Nenhuma linha problemática registrada.")
+                        ]
+                      )
+                    ]
+                  )
+                ]
+              ),
+              e(
+                "footer",
+                { key: "footer", className: "mt-4 pt-4 border-t border-slate-800 text-xs text-slate-500 flex justify-between" },
+                [
+                  e("span", { key: "left" }, "CSV Doctor v5 – Diagnóstico + Reparo Automático"),
+                  e("span", { key: "right" }, "Relatório gerado localmente (React + Tailwind)")
+                ]
+              )
+            ]
+          );
+        }
+
+        var root = ReactDOM.createRoot(document.getElementById("root"));
+        root.render(e(App));
+      })();
+    </script>
+  </body>
+</html>

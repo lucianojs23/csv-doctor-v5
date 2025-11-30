@@ -1,0 +1,9 @@
+Metadata-Version: 2.4
+Name: csvdoctor
+Version: 0.5.0
+Requires-Dist: pandas
+Requires-Dist: numpy
+Requires-Dist: matplotlib
+Requires-Dist: pyarrow
+Requires-Dist: chardet
+Dynamic: requires-dist

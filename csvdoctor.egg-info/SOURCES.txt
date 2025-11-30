@@ -1,0 +1,16 @@
+README.md
+setup.py
+csvdoctor/__init__.py
+csvdoctor/cli.py
+csvdoctor/config.py
+csvdoctor/converter.py
+csvdoctor/inspector.py
+csvdoctor/repair.py
+csvdoctor/reporter.py
+csvdoctor/utils.py
+csvdoctor.egg-info/PKG-INFO
+csvdoctor.egg-info/SOURCES.txt
+csvdoctor.egg-info/dependency_links.txt
+csvdoctor.egg-info/entry_points.txt
+csvdoctor.egg-info/requires.txt
+csvdoctor.egg-info/top_level.txt
