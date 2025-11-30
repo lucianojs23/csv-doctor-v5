@@ -1,4 +1,4 @@
-# CSV Doctor v5
+# CSV Doctor
 ## Diagnóstico, Reparo Automático e Relatórios Estruturados para Arquivos CSV
 
 O CSV Doctor v5 é uma ferramenta desenvolvida para inspeção, saneamento e padronização de arquivos CSV com problemas estruturais ou de conteúdo.  
